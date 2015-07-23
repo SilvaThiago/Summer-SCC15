@@ -1,0 +1,20 @@
+#!/bin/sh
+
+DIR=/home/thiago/Dropbox/estudar/csf/summer/bigdatax/power_management/results
+BDIR=benchmark_output
+
+printf $1", "
+awk '
+BEGIN {FS=" "; weight=0; n=0}
+(FNR-2)%6==0{
+	n++ 
+	weight += $18
+}
+END {printf weight/n", "}' $DIR/$BDIR/$1.ts
+
+grep WC00 $DIR/$BDIR/$1 | awk '
+BEGIN {FS=" "}
+{
+	printf $7";\n"
+}'
+

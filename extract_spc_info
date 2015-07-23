@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DIR=/home/thiago/Dropbox/estudar/csf/summer/bigdatax/power_management/results
+BDIR=benchmark_output
+
+printf "Time, Package Wattage, Core Wattage, Temperature, C0;\n"
+awk '
+BEGIN {FS=" "; t=0}
+(FNR-2)%6==0{
+	t += 5
+	printf t", "$18", "$19", "$9", "$1";\n"
+}' $DIR/$BDIR/$1.ts

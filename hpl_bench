@@ -1,0 +1,33 @@
+#!/bin/sh
+
+DIR=/home/thiago/Dropbox/estudar/csf/summer/bigdatax/power_management/results
+BDIR=benchmark_output
+
+mkdir $DIR/$BDIR
+
+FREQUENCIES=(800000 900000 1000000 1100000 1200000 1300000 1400000 1500000 1600000 1700000 1800000)
+
+sudo cpupower frequency-set -g userspace
+
+sudo modprobe msr
+
+printf "Frequencies, Wattage average, GFLOPS;\n" > $DIR/hpl_bench.csv
+
+for i in ${FREQUENCIES[@]}
+do
+
+    sudo cpupower frequency-set -f $i
+    sudo turbostat > $DIR/$BDIR/$i.ts &
+    pidts=$!
+    mpirun -np 4 ./xhpl > $DIR/$BDIR/$i
+    sudo pkill -P $pidts
+    
+    ./extract_gen_info $i >> $DIR/hpl_bench.csv
+
+    ./extract_spc_info $i > $DIR/hpl_bench_$i.csv
+
+    echo $i
+    #sleep 5m
+done
+
+sudo cpupower frequency-set -g ondemand
