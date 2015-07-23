@@ -1,0 +1,66 @@
+#!/bin/bash
+
+
+NB=()
+sizes=()
+Rows=21
+
+DIR=/home/thiago/Dropbox/estudar/csf/summer/bigdatax/power_management/results
+BDIR=peak_output
+
+mkdir $DIR/$BDIR
+
+# Read the file in parameter and fill the array named "array"
+getArray() {
+    i=96
+    j=0
+    while read -d ' ' line # Read a line
+    do
+    	if (test "$i" -gt 256)
+    	then
+    	   i=96
+    	   j=$(($j + 1))
+    	fi
+
+  		local row=$i
+  		local column=$j
+  		let "index = $row * $Rows + $column"
+
+        sizes[$index]=$line # Put it into the array
+        i=$(($i + 8))
+    done < $1
+}
+getArray "table.in"
+
+# row=256
+# column=10
+# let "index = $row * $Rows + $column"
+# echo ${sizes[$index]}
+
+Columns=$(($j + 1))
+i=96
+j=0
+while [ "$i" -lt 256 ]&[ "$j" -lt "$Columns" ]
+do 
+    
+	# let "index = $i * $Rows + $j"
+	# printf "${sizes[$index]} "
+    # echo $i $j
+
+#program goes here
+	let "index = $i * $Rows + $j"
+	cp HPL.model HPL.dat
+	sed -i "s/@@1/${sizes[$index]}/g" HPL.dat
+	sed -i "s/@@2/$i/g" HPL.dat
+	#cat HPL.dat | grep "Ns$"
+
+	mpirun -np 4 ./xhpl > "$DIR$BDIR/HPL-$i-${sizes[$index]}.txt"
+
+	
+    i=$(($i + 8))
+	if (test "$i" -gt 256)
+	then
+	   i=96
+	   j=$(($j + 1))
+	fi
+done
